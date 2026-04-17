@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OurMarket</title>
+
+<style>
+:root { font-size: 14px; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: white;
+  color: #555;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid gold;
+  flex-wrap: wrap;
+}
+
+.logo { font-size: 1.2rem; color: green; font-weight: bold; }
+
+.top-right { display: flex; align-items: center; gap: 0.5rem; }
+
+.sell-btn, .login-btn {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.8rem;
+  border-radius: 15px;
+  cursor: pointer;
+  border: none;
+}
+
+.sell-btn { background: green; color: white; }
+.login-btn { background: gold; color: black; }
+
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin: 0.8rem;
+}
+
+.search-box {
+  display: flex;
+  width: 95%;
+  max-width: 500px;
+  border: 1px solid gold;
+  border-radius: 25px;
+  overflow: hidden;
+}
+
+.search-box input {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  outline: none;
+}
+
+.search-btn {
+  padding: 0 0.8rem;
+  background: green;
+  color: white;
+  border: none;
+}
+
+.categories {
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+.category {
+  font-size: 0.8rem;
+  color: green;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.category.active {
+  border-bottom: 2px solid gold;
+}
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  padding: 10px;
+}
+
+.product {
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 8px;
+  border: 1px solid gold;
+}
+
+.product img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.product h4 { margin: 5px 0; color: green; }
+.product p { font-size: 0.75rem; margin: 2px 0; }
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal img {
+  max-width: 90%;
+  max-height: 80%;
+  border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="logo">OurMarket</div>
+
+  <div class="top-right">
+    <button class="sell-btn" onclick="location.href='sell.html'">Sell</button>
+    <button class="login-btn" onclick="location.href='login.html'">Login</button>
+  </div>
+</div>
+
+<div class="search-container">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search products...">
+    <button class="search-btn" onclick="searchProducts()">Go</button>
+  </div>
+</div>
+
+<div class="categories">
+  <div class="category active" onclick="filterCategory('all', this)">All</div>
+  <div class="category" onclick="filterCategory('phone', this)">Phone</div>
+  <div class="category" onclick="filterCategory('clothes', this)">Clothes</div>
+  <div class="category" onclick="filterCategory('car', this)">Car</div>
+  <div class="category" onclick="filterCategory('land', this)">Land</div>
+  <div class="category" onclick="filterCategory('others', this)">Others</div>
+</div>
+
+<div class="products" id="productList"></div>
+
+<div class="modal" id="imgModal" onclick="closeModal()">
+  <img id="modalImg">
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCkvqdZoceAjEp_ANfSl0mjGVGrxP8vm_o",
+  authDomain: "spaida-backend.firebaseapp.com",
+  projectId: "spaida-backend"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let allProducts = [];
+let currentCategory = "all";
+
+// Load products
+async function loadProducts() {
+  const snap = await getDocs(collection(db, "products"));
+
+  allProducts = snap.docs.map(doc => doc.data());
+  display(allProducts);
+}
+
+function display(products) {
+  const list = document.getElementById("productList");
+  list.innerHTML = "";
+
+  products.forEach(p => {
+    list.innerHTML += `
+      <div class="product">
+        <img src="${p.image}" onclick="openModal('${p.image}')">
+        <h4>${p.name}</h4>
+        <p>Price: ${p.price}</p>
+        <p>${p.phone}</p>
+        <p>${p.location}</p>
+      </div>
+    `;
+  });
+}
+
+// 🔥 STRONG SEARCH SYSTEM (REAL MARKETPLACE STYLE)
+window.searchProducts = function () {
+  let value = document.getElementById("searchInput").value.toLowerCase();
+
+  let filtered = allProducts.filter(p => {
+    return (
+      (p.name && p.name.toLowerCase().includes(value)) ||
+      (p.category && p.category.toLowerCase().includes(value)) ||
+      (p.location && p.location.toLowerCase().includes(value)) ||
+      (p.price && p.price.toString().toLowerCase().includes(value))
+    );
+  });
+
+  applyCategoryFilter(filtered);
+};
+
+// Category filter
+window.filterCategory = function(category, el) {
+  document.querySelectorAll(".category").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+
+  currentCategory = category;
+
+  applyCategoryFilter(allProducts);
+};
+
+// Combine search + category
+function applyCategoryFilter(products) {
+  let filtered = products;
+
+  if (currentCategory !== "all") {
+    filtered = filtered.filter(p => p.category === currentCategory);
+  }
+
+  display(filtered);
+}
+
+// LIVE SEARCH (typing instantly)
+document.getElementById("searchInput").addEventListener("input", function () {
+  searchProducts();
+});
+
+// Image modal
+window.openModal = function(img) {
+  document.getElementById("imgModal").style.display = "flex";
+  document.getElementById("modalImg").src = img;
+};
+
+window.closeModal = function() {
+  document.getElementById("imgModal").style.display = "none";
+};
+
+loadProducts();
+</script>
+
+</body>
+</html>
