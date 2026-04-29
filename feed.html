@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OurMarket</title>
+
+<style>
+:root {
+  font-size: 14px;
+
+  /* BRAND COLORS (OurMarket) */
+  --primary: #1e40af;     /* blue */
+  --primary-light: #3b82f6;
+  --accent: #f97316;      /* orange */
+
+  /* NEUTRALS */
+  --bg: #f9fafb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+}
+
+/* DARK MODE AUTO */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --border: #334155;
+  }
+}
+
+/* GLOBAL */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* TOPBAR */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.left-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.back-btn {
+  font-size: 18px;
+  color: white;
+  background: var(--primary);
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.back-btn:hover {
+  background: var(--primary-light);
+}
+
+.logo {
+  font-size: 1.3rem;
+  color: var(--primary);
+  font-weight: bold;
+}
+
+/* BUTTONS */
+.top-right {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sell-btn, .login-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sell-btn {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.sell-btn:hover {
+  transform: translateY(-1px);
+}
+
+.login-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+/* SEARCH */
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem;
+}
+
+.search-box {
+  display: flex;
+  width: 100%;
+  max-width: 600px;
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  overflow: hidden;
+  background: var(--card);
+}
+
+.search-box input {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  background: transparent;
+  color: var(--text);
+}
+
+.search-btn {
+  padding: 0 1.2rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* CATEGORIES */
+.categories {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.6rem;
+  padding: 0.6rem 1rem;
+}
+
+.category {
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.category.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* PRODUCTS GRID */
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+  padding: 14px;
+}
+
+/* PRODUCT CARD */
+.product {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.product:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+
+/* PRODUCT IMAGE FIX (IMPORTANT) */
+.product img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  display: block;
+}
+
+.product h4 {
+  margin: 6px 0 2px;
+  font-size: 0.95rem;
+  color: var(--primary);
+}
+
+.product p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  z-index: 999;
+}
+
+.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: var(--card);
+  width: 100%;
+  max-width: 750px;
+  border-radius: 16px;
+  padding: 16px;
+  position: relative;
+  max-height: 95vh;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.modal img {
+  width: 100%;
+  max-height: 60vh;
+  object-fit: cover;
+  border-radius: 1px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .products {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  .product img {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.1rem;
+  }
+
+  .products {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .product img {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+/* CONTACT ACTION AREA */
+.contact-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* BUTTON BASE STYLE */
+.contact-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 12px 14px;
+  border: none;
+  border-radius: 12px;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  width: 100%;
+  color: white;
+}
+
+/* WHATSAPP */
+.contact-btn.whatsapp {
+  background: #25D366;
+}
+
+.contact-btn.whatsapp:hover {
+  background: #1ebe5d;
+  transform: translateY(-2px);
+}
+
+/* CALL */
+.contact-btn.call {
+  background: #1e40af; /* your primary blue */
+}
+
+.contact-btn.call:hover {
+  background: #3b82f6;
+  transform: translateY(-2px);
+}
+
+/* MESSAGE */
+.contact-btn.message {
+  background: #f97316; /* your accent orange */
+}
+
+.contact-btn.message:hover {
+  background: #ea580c;
+  transform: translateY(-2px);
+}
+
+/* MODAL TEXT CLEANUP (optional polish) */
+#modalBody h3 {
+  margin-top: 10px;
+  font-size: 1.2rem;
+}
+
+#modalBody p {
+  margin: 6px 0;
+  color: var(--muted);
+}
+
+/* TABLET / LAPTOP IMPROVEMENT */
+@media (min-width: 768px) {
+  .contact-actions {
+    flex-direction: row;
+  }
+
+  .contact-btn {
+    flex: 1;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="left-top">
+    <button class="back-btn" onclick="location.href='index.html'">←</button>
+    <div class="logo">OurMarket</div>
+  </div>
+
+  <div class="top-right">
+    <button class="sell-btn" onclick="location.href='sell.html'">Sell</button>
+    <button class="login-btn" onclick="location.href='login.html'">Login</button>
+  </div>
+</div>
+
+<div class="search-container">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search by name, location or category...">
+    <button class="search-btn" onclick="loadProducts()">Go</button>
+  </div>
+</div>
+
+<div class="categories">
+  <div class="category active" onclick="filterCategory('all', this)">All</div>
+  <div class="category" onclick="filterCategory('phone', this)">Phones</div>
+  <div class="category" onclick="filterCategory('clothes', this)">Clothes</div>
+  <div class="category" onclick="filterCategory('car', this)">Cars</div>
+  <div class="category" onclick="filterCategory('land', this)">Land</div>
+  <div class="category" onclick="filterCategory('others', this)">Others</div>
+</div>
+
+<div class="products" id="productList"></div>
+
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <button class="modal-close" id="closeModal">✖</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+let currentCategory = "all";
+let cache = {};
+let loading = false;
+const LIMIT = 20;
+
+/* OPTIMIZE IMAGE (Cloudinary) */
+function optimizeImage(url) {
+  if (!url) return "https://via.placeholder.com/300";
+  return url.replace("/upload/", "/upload/w_300,f_auto,q_auto/");
+}
+
+/* LOAD PRODUCTS */
+async function loadProducts() {
+  if (loading) return;
+  loading = true;
+
+  const list = document.getElementById("productList");
+  const search = document.getElementById("searchInput").value.trim().toLowerCase();
+
+  const cacheKey = currentCategory + search;
+
+  if (cache[cacheKey]) {
+    display(cache[cacheKey]);
+    loading = false;
+    return;
+  }
+
+  // skeleton loading
+  list.innerHTML = "";
+  for (let i = 0; i < 6; i++) {
+    const sk = document.createElement("div");
+    sk.className = "product";
+    sk.innerHTML = `<div style="height:140px;background:#eee;border-radius:10px;"></div>`;
+    list.appendChild(sk);
+  }
+
+  try {
+    let url = `https://feedserver-7.onrender.com/api/products?category=${currentCategory}&limit=${LIMIT}`;
+    
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const filtered = data.filter(p => {
+      const name = (p.name || "").toLowerCase();
+      const location = (p.location || "").toLowerCase();
+      return name.includes(search) || location.includes(search);
+    });
+
+    cache[cacheKey] = filtered;
+    display(filtered);
+
+  } catch (err) {
+    list.innerHTML = "<p style='padding:10px;color:red;'>Failed to load products</p>";
+  }
+
+  loading = false;
+}
+
+/* DISPLAY */
+function display(products) {
+  const list = document.getElementById("productList");
+  list.innerHTML = "";
+
+  if (!products.length) {
+    list.innerHTML = "<p style='padding:10px;'>No products found</p>";
+    return;
+  }
+
+  products.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "product";
+
+    div.innerHTML = `
+      <img loading="lazy" src="${optimizeImage(p.images?.[0])}">
+      <h4>${p.name || "No name"}</h4>
+      <p>${p.priceText || ""}</p>
+    `;
+
+    div.onclick = () => openProduct(p);
+    list.appendChild(div);
+  });
+}
+
+function openProduct(p) {
+
+  const phone = p.phone || "";
+
+  document.getElementById("modalBody").innerHTML = `
+    <img src="${optimizeImage(p.images?.[0])}">
+    
+    <h3>${p.name}</h3>
+    <p><b>Price:</b> ${p.priceText}</p>
+    <p><b>Phone:</b> ${phone}</p>
+    <p><b>Location:</b> ${p.location || ""}</p>
+
+    <div class="contact-actions">
+
+      <button class="contact-btn whatsapp" onclick="openWhatsApp('${phone}', '${p.name}')">
+        💬 WhatsApp
+      </button>
+
+      <button class="contact-btn call" onclick="callNumber('${phone}')">
+        📞 Call
+      </button>
+
+      <button class="contact-btn message" onclick="sendMessage('${phone}', '${p.name}')">
+        ✉️ Message
+      </button>
+
+    </div>
+  `;
+
+  document.getElementById("modal").classList.remove("hidden");
+}
+
+/* CLOSE */
+document.getElementById("closeModal").onclick = () => {
+  document.getElementById("modal").classList.add("hidden");
+};
+
+document.getElementById("modal").onclick = (e) => {
+  if (e.target.id === "modal") {
+    document.getElementById("modal").classList.add("hidden");
+  }
+};
+
+/* CATEGORY */
+function filterCategory(category, el) {
+  document.querySelectorAll(".category").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+  currentCategory = category;
+  loadProducts();
+}
+
+/* SEARCH (DEBOUNCE) */
+document.getElementById("searchInput").addEventListener("input", () => {
+  clearTimeout(window.t);
+  window.t = setTimeout(loadProducts, 400);
+});
+
+/* INITIAL LOAD */
+loadProducts();
+
+/* =========================
+   WHATSAPP FUNCTION
+========================= */
+function openWhatsApp(phone, productName) {
+  if (!phone) {
+    alert("No WhatsApp number available for this seller.");
+    return;
+  }
+
+  // clean number (remove spaces, +, -, etc.)
+  let clean = phone.replace(/\D/g, "");
+
+  // optional: add country code if missing (Malawi example +265)
+  if (clean.length < 9) {
+    alert("Invalid WhatsApp number.");
+    return;
+  }
+
+  const message = encodeURIComponent(
+    `Hi, I'm interested in your product: ${productName}`
+  );
+
+  const url = `https://wa.me/${clean}?text=${message}`;
+
+  const win = window.open(url, "_blank");
+
+  if (!win) {
+    alert("Could not open WhatsApp. Please check your browser or app.");
+  }
+}
+
+
+/* =========================
+   CALL FUNCTION
+========================= */
+function callNumber(phone) {
+  if (!phone) {
+    alert("No phone number available.");
+    return;
+  }
+
+  let clean = phone.replace(/\D/g, "");
+
+  if (clean.length < 7) {
+    alert("Invalid phone number.");
+    return;
+  }
+
+  // Opens device dialer
+  window.location.href = `tel:${clean}`;
+}
+
+
+/* =========================
+   SMS / MESSAGE FUNCTION
+========================= */
+function sendMessage(phone, productName) {
+  if (!phone) {
+    alert("No phone number available.");
+    return;
+  }
+
+  let clean = phone.replace(/\D/g, "");
+
+  if (clean.length < 7) {
+    alert("Invalid phone number.");
+    return;
+  }
+
+  const message = encodeURIComponent(
+    `Hi, I'm interested in your product: ${productName}`
+  );
+
+  // Works on most Android & iOS devices
+  window.location.href = `sms:${clean}?body=${message}`;
+}
+</script>
+</body>
+</html>
